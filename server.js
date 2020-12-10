@@ -2,6 +2,7 @@
 require('dotenv').config();
 const express     = require('express');
 const bodyParser  = require('body-parser');
+const helmet      = require("helmet");
 const cors        = require('cors');
 
 const apiRoutes         = require('./routes/api.js');
@@ -9,6 +10,20 @@ const fccTestingRoutes  = require('./routes/fcctesting.js');
 const runner            = require('./test-runner');
 
 const app = express();
+
+app.use(
+    helmet({
+        frameguard: {
+            action: "deny",
+        },
+        dnsPrefetchControl: {
+            allow: false,
+        },
+        referrerPolicy: {
+            policy: "origin",
+        },
+    })
+);
 
 app.use('/public', express.static(process.cwd() + '/public'));
 
@@ -36,7 +51,7 @@ app.route('/')
 //For FCC testing purposes
 fccTestingRoutes(app);
 
-//Routing for API 
+//Routing for API
 apiRoutes(app);
 
 //404 Not Found Middleware
