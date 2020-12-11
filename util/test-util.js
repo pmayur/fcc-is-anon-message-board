@@ -1,3 +1,5 @@
+const Thread = require("../models/thread");
+
 const words = [
     "darvon",
     "erythrocyte",
@@ -61,6 +63,27 @@ class TestUtil {
     get randomWord() {
         var randomIndex = Math.floor(Math.random() * words.length);
         return words[randomIndex];
+    }
+
+    createNewThread = (board = this.BOARD.TEST) => {
+        let text            = this.randomWord;
+        let delete_password = text
+
+        return new Promise( async (resolve, reject) => {
+            try {
+
+                let threadObj = { board, text, delete_password };
+                let thread = await new Thread(threadObj).save();
+
+                resolve(thread);
+            } catch (error) {
+                reject("TEST_ERR: error in creating new thread")
+            }
+        })
+    }
+
+    time = (time) => {
+        return new Date(time).getTime();
     }
 }
 
