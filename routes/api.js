@@ -3,8 +3,13 @@
 module.exports = function (app) {
 
     app.route("/api/threads/:board")
-       .post(require("./controllers/post-thread"));
+
+        .get(require("./controllers/get-threads"))
+
+        .post(require("./controllers/post-thread"))
+
 
     app.route("/api/replies/:board")
+
         .post(require("./controllers/post-reply"));
 };
