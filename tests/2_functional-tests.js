@@ -130,6 +130,48 @@ suite("Functional Tests", () => {
                     done();
                 })
         });
+    });
+
+    suite("Viewing the threads", () => {
+
+        let board = util.BOARD.TEST;
+
+        test("Get 10 recently bumped threads", (done) => {
+
+            chai.request(server)
+                .get(`/api/threads/${board}`)
+                .end((err, res) => {
+                    assert.equal(res.status, 200);
+                    assert.notExists(err);
+
+                    assert.isArray(res.body);
+                    assert.isAtMost(res.body.length, 10);
+
+                    let timeA = util.time(res.body[0].bumped_on)
+                    let timeB = util.time(res.body[1].bumped_on)
+
+                    assert.isAbove(timeA, timeB);
+
+                    res.body.forEach((element) => {
+
+                        let replies = element.replies;
+                        let length  = replies.length;
+
+                        assert.equal(element.replycount, length)
+                        assert.isAtMost(length, 3);
+
+                        if( length > 1 ) {
+                            assert.isAbove(
+                                util.time(replies[0].created_on),
+                                util.time(replies[1].created_on)
+                            )
+                        }
+                    });
+
+                    done();
+                })
+        })
+
     })
 });
 
