@@ -2,6 +2,7 @@ const chaiHttp      = require("chai-http");
 const chai          = require("chai");
 const server        = require("../server");
 const TestUtil      = require("../util/test-util");
+const Reply         = require("../models/reply");
 
 const assert        = chai.assert;
 const util          = new TestUtil(); // test utilities class
@@ -172,6 +173,57 @@ suite("Functional Tests", () => {
                 })
         })
 
+    })
+
+    suite("View single thread", () => {
+        let board = util.BOARD.TEST;
+
+        let thread;
+        let thread_id;
+
+        before( async () => {
+            try {
+
+                thread      = await util.randomThreadWithReplies(board);
+                thread_id   = thread._id.toString();
+            } catch (error) {
+                console.log(error)
+            }
+        })
+
+        test("Get a thread with details and replies", (done) => {
+
+            chai.request(server)
+                .get(`/api/replies/${board}`)
+                .query({ thread_id })
+                .end((err, res) => {
+
+                    assert.equal(res.status, 200);
+                    assert.notExists(err);
+
+                    assert.exists(res.body._id);
+                    assert.exists(res.body.created_on);
+                    assert.exists(res.body.bumped_on);
+                    assert.exists(res.body.text);
+
+                    assert.notExists(res.body.delete_password);
+                    assert.notExists(res.body.reported);
+
+                    let replies = res.body.replies;
+
+                    assert.isArray(replies);
+                    assert.equal(res.body.__v, replies.length);
+
+                    replies.forEach(reply => {
+                        assert.exists(reply.text);
+                        assert.exists(reply.parent);
+                        assert.exists(reply.delete_password);
+                        assert.exists(reply.reported);
+                    });
+
+                    done();
+                })
+        })
     })
 });
 
