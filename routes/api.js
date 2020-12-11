@@ -11,5 +11,7 @@ module.exports = function (app) {
 
     app.route("/api/replies/:board")
 
+        .get(require("./controllers/get-single-thread"))
+
         .post(require("./controllers/post-reply"));
 };
