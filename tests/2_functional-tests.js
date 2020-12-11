@@ -41,4 +41,95 @@ suite("Functional Tests", () => {
                 });
         });
     });
+
+    suite("Creating Reply", () => {
+
+        let board           = util.BOARD.TEST;
+
+        let thread;
+        let thread_id;
+
+        before( async () => {
+            try {
+                thread      = await util.createNewThread(board);
+                thread_id   = thread.id;
+            } catch (error) {
+                console.log(error);
+            }
+        })
+
+        test("Create a new Reply on a thread", (done) => {
+
+            let text            = util.randomWord;
+            let delete_password = text;
+
+            chai.request(server)
+                .post(`/api/replies/${board}`)
+                .send({
+                    thread_id,
+                    text,
+                    delete_password
+                })
+                .end( (err, res) => {
+
+                    assert.equal(res.status, 200);
+                    assert.notExists(err);
+                    assert.equal(res.body.replies.length, 1);
+
+                    let exp = thread;
+                    let act = res.body;
+
+                    assert.equal(exp._id, act._id);
+                    assert.equal(exp.text, act.text);
+                    assert.equal(exp.delete_password, act.delete_password);
+                    assert.equal(util.time(exp.created_on), util.time(act.created_on));
+                    assert.notEqual(util.time(exp.bumped_on), util.time(act.bumped_on));
+
+                    let reply = res.body.replies[0];
+
+                    assert.equal(reply.text, text);
+                    assert.equal(reply.delete_password, delete_password);
+
+                    done();
+                })
+        });
+
+        test("Create a second Reply on a thread", (done) => {
+
+            let text            = util.randomWord;
+            let delete_password = text;
+
+
+            chai.request(server)
+                .post(`/api/replies/${board}`)
+                .send({
+                    thread_id,
+                    text,
+                    delete_password
+                })
+                .end( (err, res) => {
+
+                    assert.equal(res.status, 200);
+                    assert.notExists(err);
+                    assert.equal(res.body.replies.length, 2);
+
+                    let exp = thread;
+                    let act = res.body;
+
+                    assert.equal(exp._id, act._id);
+                    assert.equal(exp.text, act.text);
+                    assert.equal(exp.delete_password, act.delete_password);
+                    assert.equal(util.time(exp.created_on), util.time(act.created_on));
+                    assert.notEqual(util.time(exp.bumped_on), util.time(act.bumped_on));
+
+                    let reply = res.body.replies[1];
+
+                    assert.equal(reply.text, text);
+                    assert.equal(reply.delete_password, delete_password);
+
+                    done();
+                })
+        });
+    })
 });
+
