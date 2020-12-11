@@ -8,6 +8,8 @@ module.exports = function (app) {
 
         .post(require("./controllers/post-thread"))
 
+        .put(require("./controllers/report-thread"))
+
 
     app.route("/api/replies/:board")
 
