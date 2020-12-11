@@ -1,4 +1,5 @@
 const Thread = require("../models/thread");
+const Reply  = require("../models/reply");
 
 const words = [
     "darvon",
@@ -60,8 +61,12 @@ class TestUtil {
         };
     }
 
+    randomIndex(length) {
+        return Math.floor(Math.random() * length);
+    }
+
     get randomWord() {
-        var randomIndex = Math.floor(Math.random() * words.length);
+        var randomIndex = this.randomIndex(words.length);
         return words[randomIndex];
     }
 
@@ -84,6 +89,23 @@ class TestUtil {
 
     time = (time) => {
         return new Date(time).getTime();
+    }
+
+    randomThreadWithReplies = (board = this.BOARD.TEST) => {
+
+        const FILTER = { board, __v: { $gt: 0 } };
+
+        return new Promise( async (resolve, reject) => {
+            try {
+
+                let allThreads = await Thread.find(FILTER);
+                let randomIndex = this.randomIndex(allThreads.length);
+
+                resolve(allThreads[randomIndex])
+            } catch (error) {
+                reject('TEST_ERR: error in getting random thread with replies')
+            }
+        })
     }
 }
 
