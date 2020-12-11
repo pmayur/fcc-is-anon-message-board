@@ -3,6 +3,7 @@ require('dotenv').config();
 const express     = require('express');
 const bodyParser  = require('body-parser');
 const helmet      = require("helmet");
+const mongoose    = require('mongoose');
 const cors        = require('cors');
 
 const apiRoutes         = require('./routes/api.js');
@@ -11,6 +12,27 @@ const runner            = require('./test-runner');
 
 const app = express();
 
+// database uri
+const mongoDBURI = process.env.DB;
+
+//Set up default mongoose connection
+mongoose.connect(
+  mongoDBURI,
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    autoReconnect: false
+  },
+  (err) => {
+    if(err) {
+      console.log("MongoDB connection error:", err.message)
+    } else {
+      console.log("MongoDB connected")
+    }
+  }
+);
+
+// Helmet Config
 app.use(helmet.frameguard({ action: 'sameorigin' }));
 app.use(helmet.dnsPrefetchControl({allow: false}));
 app.use(helmet.referrerPolicy({policy: "same-origin"}));
