@@ -225,5 +225,37 @@ suite("Functional Tests", () => {
                 })
         })
     })
+
+    suite("Report a thread", () => {
+        let board = util.BOARD.TEST;
+
+        let thread;
+        let thread_id;
+
+        before( async () => {
+            try {
+
+                thread      = await util.randomThreadWithReplies(board);
+                thread_id   = thread._id.toString();
+            } catch (error) {
+                console.log(error)
+            }
+        })
+
+        test("Report a thread", (done) => {
+
+            chai.request(server)
+                .put(`/api/threads/${board}`)
+                .send({ thread_id })
+                .end((err, res) => {
+
+                    assert.equal(res.status, 200);
+                    assert.notExists(err);
+
+                    assert.equal(res.text, "success");
+                    done();
+                })
+        })
+    })
 });
 
