@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
         thread.reported = true;
 
         // save updated thread
-        await thread.save();
+        await thread.save({timestamps : false});
 
         res.send("success")
 
