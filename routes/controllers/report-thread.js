@@ -1,13 +1,13 @@
 const Thread = require("../../models/thread");
-const { ERR } = require("../../util/errors")
+const { ERR } = require("../../util/errors");
 
 module.exports = async (req, res) => {
 
-    let _id     = req.body.thread_id;
-    let board   = req.params.board;
+    let _id         = req.body.thread_id;
+    let board       = req.params.board;
 
-    const FILTER = { _id, board };
-    const UPDATE = { reported: true }
+    const FILTER    = { _id, board };
+    const OPTIONS   = { timestamps: false }
 
     try {
 
@@ -18,7 +18,7 @@ module.exports = async (req, res) => {
         thread.reported = true;
 
         // save updated thread
-        await thread.save({timestamps : false});
+        await thread.save(OPTIONS);
 
         res.send("success")
 
