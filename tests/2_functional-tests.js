@@ -306,6 +306,47 @@ suite("Functional Tests", () => {
         })
     })
 
+    suite("Deleting a thread", () => {
+        let board = util.BOARD.TEST;
+
+        /* You can send a DELETE request to /api/threads/{board} and pass along the thread_id & delete_password to delete the thread. Returned will be the string incorrect password or success. */
+
+        let thread, thread_id, delete_password;
+
+        before( async () => {
+            try {
+
+                thread          = await util.randomThreadWithReplies(board);
+                thread_id       = thread._id.toString();
+                delete_password = thread.delete_password;
+
+            } catch (error) {
+                console.error(error);
+            }
+        })
+
+        test("Delete a thread by sending a delete request", (done) => {
+
+            chai.request(server)
+                .delete(`/api/threads/${board}`)
+                .send({ thread_id, delete_password })
+                .end( async (err, res) => {
+                    try {
+                        assert.equal(res.status, 200);
+                        assert.notExists(err);
+                        assert.equal(res.text, "success");
+
+                        let deleted = await Thread.findById(thread_id);
+                        assert.isNull(deleted);
+
+                        done();
+
+                    } catch (error) {
+                        done(error);
+                    }
+                })
+        })
+    })
 
 });
 
