@@ -364,5 +364,70 @@ suite("Functional Tests", () => {
         })
     })
 
+    suite("Delete a reply", () => {
+
+        let board = util.BOARD.TEST;
+        let thread_id, reply_id, delete_password;
+
+        before( async() => {
+
+            try {
+                let thread          = await util.randomThreadWithReplies();
+
+                let replies         = thread.replies;
+                let index           = util.randomIndex(replies.length);
+                let testReply       = replies[index];
+
+                thread_id           = thread._id.toString();
+                reply_id            = testReply._id;
+                delete_password     = testReply.delete_password;
+
+            } catch (error) {
+                console.error(error)
+            }
+        })
+
+        test("Delete a reply with delete request", (done) => {
+
+            const REQUEST_BODY = { thread_id, reply_id, delete_password };
+
+            chai.request(server)
+                .delete(`/api/replies/${board}`)
+                .send(REQUEST_BODY)
+                .end( async (err, res) => {
+                    try {
+                        assert.equal(res.status, 200);
+                        assert.notExists(err);
+                        assert.equal(res.text, "success");
+
+                        let deletedReply = await Reply.findById(reply_id);
+                        assert.equal(deletedReply.text, "[deleted]");
+
+                        done();
+                    } catch (error) {
+                        done(error);
+                    }
+                })
+        })
+
+        test("Delete a reply with incorrect password", (done) => {
+
+            let delete_password = "incorrect_password"
+
+            const REQUEST_BODY = { thread_id, reply_id, delete_password };
+
+            chai.request(server)
+                .delete(`/api/replies/${board}`)
+                .send(REQUEST_BODY)
+                .end( (err, res) => {
+
+                    assert.equal(res.status, 200);
+                    assert.notExists(err);
+                    assert.equal(res.text, "incorrect password");
+                    done();
+                })
+        })
+    })
+
 });
 
