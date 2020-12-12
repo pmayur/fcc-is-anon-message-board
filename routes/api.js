@@ -20,4 +20,6 @@ module.exports = function (app) {
         .post(require("./controllers/post-reply"))
 
         .put(require("./controllers/report-reply"))
+
+        .delete(require("./controllers/delete-reply"))
 };
