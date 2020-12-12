@@ -12,15 +12,16 @@ chai.use(chaiHttp);
 
 suite("Functional Tests", () => {
 
+    const BOARD = util.BOARD.TEST;
+
     suite("Creating Thread", () => {
 
-        let board           = util.BOARD.TEST;  // board for testing
         let text            = util.randomWord;
         let delete_password = text;             // same as text for simplicity
 
         test("Create a new Thread under a board", (done) => {
             chai.request(server)
-                .post(`/api/threads/${board}`)
+                .post(`/api/threads/${BOARD}`)
                 .send({
                     text,
                     delete_password
@@ -46,17 +47,15 @@ suite("Functional Tests", () => {
 
     suite("Creating Reply", () => {
 
-        let board           = util.BOARD.TEST;
-
         let thread;
         let thread_id;
 
         before( async () => {
             try {
-                thread      = await util.createNewThread(board);
+                thread      = await util.createNewThread(BOARD);
                 thread_id   = thread.id;
             } catch (error) {
-                console.log(error);
+                console.error(error);
             }
         })
 
@@ -66,7 +65,7 @@ suite("Functional Tests", () => {
             let delete_password = text;
 
             chai.request(server)
-                .post(`/api/replies/${board}`)
+                .post(`/api/replies/${BOARD}`)
                 .send({
                     thread_id,
                     text,
@@ -103,7 +102,7 @@ suite("Functional Tests", () => {
 
 
             chai.request(server)
-                .post(`/api/replies/${board}`)
+                .post(`/api/replies/${BOARD}`)
                 .send({
                     thread_id,
                     text,
@@ -136,12 +135,10 @@ suite("Functional Tests", () => {
 
     suite("Viewing the threads", () => {
 
-        let board = util.BOARD.TEST;
-
         test("Get 10 recently bumped threads", (done) => {
 
             chai.request(server)
-                .get(`/api/threads/${board}`)
+                .get(`/api/threads/${BOARD}`)
                 .end((err, res) => {
                     assert.equal(res.status, 200);
                     assert.notExists(err);
@@ -177,7 +174,6 @@ suite("Functional Tests", () => {
     })
 
     suite("View single thread", () => {
-        let board = util.BOARD.TEST;
 
         let thread;
         let thread_id;
@@ -185,17 +181,17 @@ suite("Functional Tests", () => {
         before( async () => {
             try {
 
-                thread      = await util.randomThreadWithReplies(board);
+                thread      = await util.randomThreadWithReplies(BOARD);
                 thread_id   = thread._id.toString();
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         })
 
         test("Get a thread with details and replies", (done) => {
 
             chai.request(server)
-                .get(`/api/replies/${board}`)
+                .get(`/api/replies/${BOARD}`)
                 .query({ thread_id })
                 .end((err, res) => {
 
@@ -228,7 +224,6 @@ suite("Functional Tests", () => {
     })
 
     suite("Reporting", () => {
-        let board = util.BOARD.TEST;
 
         // for report thread test
         let thread, thread_id, bumped_on;
@@ -239,7 +234,7 @@ suite("Functional Tests", () => {
         before( async () => {
             try {
                 // Details required for reporting thread
-                thread      = await util.randomThreadWithReplies(board);
+                thread      = await util.randomThreadWithReplies(BOARD);
                 thread_id   = thread._id.toString();
                 bumped_on   = thread.bumped_on
 
@@ -251,14 +246,14 @@ suite("Functional Tests", () => {
                 reply_id    = testReply._id;
 
             } catch (error) {
-                console.log(error)
+                console.error(error)
             }
         })
 
         test("Report a thread", (done) => {
 
             chai.request(server)
-                .put(`/api/threads/${board}`)
+                .put(`/api/threads/${BOARD}`)
                 .send({ thread_id })
                 .end( async (err, res) => {
 
@@ -286,7 +281,7 @@ suite("Functional Tests", () => {
         test("Report a reply", (done) => {
 
             chai.request(server)
-                .put(`/api/replies/${board}`)
+                .put(`/api/replies/${BOARD}`)
                 .send({ thread_id, reply_id })
                 .end( async (err, res) => {
                     try {
@@ -307,16 +302,13 @@ suite("Functional Tests", () => {
     })
 
     suite("Deleting a thread", () => {
-        let board = util.BOARD.TEST;
-
-        /* You can send a DELETE request to /api/threads/{board} and pass along the thread_id & delete_password to delete the thread. Returned will be the string incorrect password or success. */
 
         let thread, thread_id, delete_password;
 
         before( async () => {
             try {
 
-                thread          = await util.randomThreadWithReplies(board);
+                thread          = await util.randomThreadWithReplies(BOARD);
                 thread_id       = thread._id.toString();
                 delete_password = thread.delete_password;
 
@@ -328,7 +320,7 @@ suite("Functional Tests", () => {
         test("Delete a thread by sending a delete request", (done) => {
 
             chai.request(server)
-                .delete(`/api/threads/${board}`)
+                .delete(`/api/threads/${BOARD}`)
                 .send({ thread_id, delete_password })
                 .end( async (err, res) => {
                     try {
@@ -352,7 +344,7 @@ suite("Functional Tests", () => {
             let delete_password = "incorrect_password"
 
             chai.request(server)
-                .delete(`/api/threads/${board}`)
+                .delete(`/api/threads/${BOARD}`)
                 .send({ thread_id, delete_password })
                 .end( (err, res) => {
 
@@ -366,7 +358,6 @@ suite("Functional Tests", () => {
 
     suite("Delete a reply", () => {
 
-        let board = util.BOARD.TEST;
         let thread_id, reply_id, delete_password;
 
         before( async() => {
@@ -392,7 +383,7 @@ suite("Functional Tests", () => {
             const REQUEST_BODY = { thread_id, reply_id, delete_password };
 
             chai.request(server)
-                .delete(`/api/replies/${board}`)
+                .delete(`/api/replies/${BOARD}`)
                 .send(REQUEST_BODY)
                 .end( async (err, res) => {
                     try {
@@ -417,7 +408,7 @@ suite("Functional Tests", () => {
             const REQUEST_BODY = { thread_id, reply_id, delete_password };
 
             chai.request(server)
-                .delete(`/api/replies/${board}`)
+                .delete(`/api/replies/${BOARD}`)
                 .send(REQUEST_BODY)
                 .end( (err, res) => {
 
