@@ -346,6 +346,22 @@ suite("Functional Tests", () => {
                     }
                 })
         })
+
+        test("Delete a thread with incorrect password", (done) => {
+
+            let delete_password = "incorrect_password"
+
+            chai.request(server)
+                .delete(`/api/threads/${board}`)
+                .send({ thread_id, delete_password })
+                .end( (err, res) => {
+
+                    assert.equal(res.status, 200);
+                    assert.notExists(err);
+                    assert.equal(res.text, "incorrect password");
+                    done();
+                })
+        })
     })
 
 });
