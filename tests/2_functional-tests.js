@@ -3,6 +3,7 @@ const chai          = require("chai");
 const server        = require("../server");
 const TestUtil      = require("../util/test-util");
 const Reply         = require("../models/reply");
+const Thread        = require("../models/thread");
 
 const assert        = chai.assert;
 const util          = new TestUtil(); // test utilities class
@@ -231,12 +232,15 @@ suite("Functional Tests", () => {
 
         let thread;
         let thread_id;
+        let bumped_on;
 
         before( async () => {
             try {
 
                 thread      = await util.randomThreadWithReplies(board);
                 thread_id   = thread._id.toString();
+                bumped_on   = thread.bumped_on
+
             } catch (error) {
                 console.log(error)
             }
@@ -247,13 +251,26 @@ suite("Functional Tests", () => {
             chai.request(server)
                 .put(`/api/threads/${board}`)
                 .send({ thread_id })
-                .end((err, res) => {
+                .end( async (err, res) => {
 
-                    assert.equal(res.status, 200);
-                    assert.notExists(err);
+                    try {
 
-                    assert.equal(res.text, "success");
-                    done();
+                        let reportedThread          = await Thread.findById(thread_id);
+                        let bumpedOnPreReporting    = util.time(bumped_on);
+                        let bumpedOnPostReporting   = util.time(reportedThread.bumped_on);
+
+                        assert.isTrue(reportedThread.reported);
+                        assert.equal(bumpedOnPostReporting, bumpedOnPreReporting);
+
+                        assert.equal(res.status, 200);
+                        assert.notExists(err);
+                        assert.equal(res.text, "success");
+
+                        done();
+
+                    } catch (error) {
+                        done(error);
+                    }
                 })
         })
     })
