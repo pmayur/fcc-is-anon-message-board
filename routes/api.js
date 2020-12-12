@@ -10,6 +10,8 @@ module.exports = function (app) {
 
         .put(require("./controllers/report-thread"))
 
+        .delete(require("./controllers/delete-thread"))
+
 
     app.route("/api/replies/:board")
 
