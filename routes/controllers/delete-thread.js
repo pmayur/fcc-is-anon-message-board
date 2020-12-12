@@ -1,6 +1,6 @@
 const Thread = require("../../models/thread");
 
-module.exports = async (req, res) => {
+module.exports = (req, res) => {
 
     let board               = req.params.board;
     let _id                 = req.body.thread_id;
@@ -8,14 +8,11 @@ module.exports = async (req, res) => {
 
     const FILTER = { board, _id, delete_password };
 
-    try {
-
-        await Thread.deleteOne(FILTER);
-
-        return res.send("success")
-
-    } catch (error) {
+    Thread.findOneAndDelete(FILTER).exec( (err, deleted) => {
+        if(deleted) {
+            return res.send("success")
+        }
 
         return res.send('incorrect password')
-    }
+    })
 }
