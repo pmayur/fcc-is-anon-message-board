@@ -15,5 +15,7 @@ module.exports = function (app) {
 
         .get(require("./controllers/get-single-thread"))
 
-        .post(require("./controllers/post-reply"));
+        .post(require("./controllers/post-reply"))
+
+        .put(require("./controllers/report-reply"))
 };
