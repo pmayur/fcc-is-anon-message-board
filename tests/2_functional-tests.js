@@ -227,19 +227,28 @@ suite("Functional Tests", () => {
         })
     })
 
-    suite("Report a thread", () => {
+    suite("Reporting", () => {
         let board = util.BOARD.TEST;
 
-        let thread;
-        let thread_id;
-        let bumped_on;
+        // for report thread test
+        let thread, thread_id, bumped_on;
+
+        // for report reply test
+        let replies, testReply, reply_id;
 
         before( async () => {
             try {
-
+                // Details required for reporting thread
                 thread      = await util.randomThreadWithReplies(board);
                 thread_id   = thread._id.toString();
                 bumped_on   = thread.bumped_on
+
+                // Details required for reporting a reply
+                replies     = thread.replies;
+                let index   = util.randomIndex(replies.length); // random index
+
+                testReply   = replies[index];
+                reply_id    = testReply._id;
 
             } catch (error) {
                 console.log(error)
@@ -273,6 +282,30 @@ suite("Functional Tests", () => {
                     }
                 })
         })
+
+        test("Report a reply", (done) => {
+
+            chai.request(server)
+                .put(`/api/replies/${board}`)
+                .send({ thread_id, reply_id })
+                .end( async (err, res) => {
+                    try {
+
+                        assert.equal(res.status, 200);
+                        assert.notExists(err);
+                        assert.equal(res.text, "reported");
+
+                        let reportedReply = await Reply.findById(reply_id);
+                        assert.isTrue(reportedReply.reported);
+                        done();
+
+                    } catch (error) {
+                        done(error)
+                    }
+                })
+        })
     })
+
+
 });
 
