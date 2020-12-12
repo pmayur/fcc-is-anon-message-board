@@ -376,10 +376,10 @@ suite("Functional Tests", () => {
 
                 let replies         = thread.replies;
                 let index           = util.randomIndex(replies.length);
-                let testReply       = replies[index];
+                let testReply       = await Reply.findOne(replies[index])
 
                 thread_id           = thread._id.toString();
-                reply_id            = testReply._id;
+                reply_id            = testReply._id.toString();
                 delete_password     = testReply.delete_password;
 
             } catch (error) {
